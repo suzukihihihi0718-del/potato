@@ -1468,8 +1468,11 @@ async function processLineMessage(
   message,
   env
 ) {
+  console.log("LINE PROCESS START:", message);
 
   try {
+
+    console.log("GENERATE REPLY START");
 
     const reply =
       await generateJagajagaReply(
@@ -1478,6 +1481,12 @@ async function processLineMessage(
         env
       );
 
+    console.log(
+      "GENERATE REPLY SUCCESS:",
+      reply
+    );
+
+    console.log("LINE REPLY START");
 
     await replyToLine(
       replyToken,
@@ -1485,14 +1494,14 @@ async function processLineMessage(
       env
     );
 
+    console.log("LINE REPLY SUCCESS");
 
   } catch (error) {
 
     console.error(
       "LINE PROCESS ERROR:",
-      error
+      error?.message || error
     );
-
 
     try {
 
@@ -1504,16 +1513,19 @@ async function processLineMessage(
         env
       );
 
+      console.log(
+        "ERROR REPLY SUCCESS"
+      );
+
     } catch (replyError) {
 
       console.error(
         "LINE REPLY ERROR:",
-        replyError
+        replyError?.message || replyError
       );
     }
   }
 }
-
 
 // ==========================================
 // LINE返信
@@ -1524,6 +1536,9 @@ async function replyToLine(
   text,
   env
 ) {
+  console.log(
+    "LINE API CALL START"
+  );
 
   const response =
     await fetch(
@@ -1533,7 +1548,6 @@ async function replyToLine(
         method: "POST",
 
         headers: {
-
           "Content-Type":
             "application/json",
 
@@ -1544,11 +1558,9 @@ async function replyToLine(
 
         body:
           JSON.stringify({
-
             replyToken,
 
             messages: [
-
               {
                 type: "text",
 
@@ -1556,18 +1568,20 @@ async function replyToLine(
                   String(text)
                     .slice(0, 5000)
               }
-
             ]
           })
       }
     );
 
+  console.log(
+    "LINE API STATUS:",
+    response.status
+  );
 
   if (!response.ok) {
 
     const errorText =
       await response.text();
-
 
     console.error(
       "LINE REPLY ERROR:",
@@ -1575,15 +1589,16 @@ async function replyToLine(
       errorText
     );
 
-
     throw new Error(
       "LINE reply failed: " +
       response.status
     );
   }
+
+  console.log(
+    "LINE API SUCCESS"
+  );
 }
-
-
 // ==========================================
 // LINE署名確認
 // ==========================================
